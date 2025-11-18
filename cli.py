@@ -84,7 +84,7 @@ async def run_cli() -> None:
         if error:
             print(f"  Error: {error}")
         if not matches:
-            print("  No matches found.")
+            print("  No matches found. Try a shorter or partial title, or search by author name.")
             continue
 
         for idx, match in enumerate(matches, start=1):

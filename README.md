@@ -1,13 +1,17 @@
-## Guttenread MCP Server (Python)
+## Guttenread Reading List App
 
-This directory contains a small **Python MCP server** that lets an AI agent
-search Project Gutenberg (via the **Gutendex** API), fetch metadata, and
-optionally download book texts.
+This project is a small **reading list app** that uses OpenAI plus Project
+Gutenberg (via the **Gutendex** API) to clean up a messy reading list and tell
+you which books are available on Project Gutenberg.
 
-The main tool it exposes is:
+Under the hood it reuses a single function:
 
 - **`search_gutenberg`**: Given a list of book titles, returns structured
-  search results and (optionally) text excerpts or full texts.
+  search results and (optionally) text excerpts or full texts from Gutendex.
+
+The reading list app wires this up as a **local tool** for the OpenAI Chat
+Completions API. You do **not** need to configure MCP or an IDE integration to
+use it.
 
 ### 1. Setup (with Conda)
 
@@ -28,42 +32,9 @@ conda activate guttenread
 pip install -r requirements.txt
 ```
 
-### 2. Using the CLI (no MCP / IDE wiring required)
+### 2. OpenAI reading list app (main demo)
 
-You can call the same logic directly from the terminal via `cli.py`.
-
-From the project root (with the `guttenread` Conda env activated):
-
-```bash
-cd /Users/dylan/Documents/Cursor/Guttenread
-python cli.py
-```
-
-This will prompt you for titles, e.g.:
-
-```text
-Pride and Prejudice; Dracula; Frankenstein
-```
-
-You can also pass titles on the command line:
-
-```bash
-python cli.py "Pride and Prejudice" Dracula Frankenstein
-```
-
-And you can request text excerpts as well:
-
-```bash
-python cli.py "Pride and Prejudice" --max-results 1 --download-text --max-chars 5000
-```
-
-The CLI prints, for each query:
-- The title, authors, Gutenberg ID, language(s), download count, and Gutenberg URL.
-- If `--download-text` is used, a short preview and total character count for the text.
-
-### 3. OpenAI reading list app
-
-You can also run a small **OpenAI-powered app** that:
+The main entry point is `reading_list_app.py`, which:
 - Takes a messy reading list (file or pasted text),
 - Uses an OpenAI model to normalize and clean up the titles,
 - Then calls the same `search_gutenberg` logic as a tool to look them up,
@@ -100,36 +71,7 @@ The app will:
 - Call the `search_gutenberg` tool with a normalized title list,
 - Then print a human-friendly summary with titles, authors, languages, and Gutenberg URLs.
 
-### 4. Running the MCP server
-
-The server is implemented in `guttenread_mcp/server.py` and is designed to run
-over **stdio**, as expected by MCP clients.
-
-To run it directly (for testing):
-
-```bash
-cd /Users/dylan/Documents/Cursor/Guttenread
-python -m guttenread_mcp.server
-```
-
-In practice, an MCP-capable AI client (such as a compatible IDE or chat
-environment) will launch this server **as a subprocess over stdio** using a
-configuration entry similar to:
-
-```json
-{
-  "name": "guttenread-gutendex",
-  "command": "python",
-  "args": [
-    "-m",
-    "guttenread_mcp.server"
-  ]
-}
-```
-
-> Check your specific MCP client’s documentation for the exact config format.
-
-### 5. Tool: `search_gutenberg`
+### 3. Tool: `search_gutenberg` (shared logic)
 
 **Signature (conceptual):**
 
@@ -179,18 +121,27 @@ configuration entry similar to:
 }
 ```
 
-### 6. How you might use this in an app
+If Gutendex returns **no matches** for a given query:
 
-Once your MCP client is configured to use this server, you can build a simple
-app (or just chat with the model) using prompts like:
+- The `matches` array will simply be empty for that `query`.
+- In the CLI, you will see:  
+  `No matches found. Try a shorter or partial title, or search by author name.`
 
-- **“Given the titles ‘Pride and Prejudice’, ‘Dracula’, and ‘Frankenstein’,
-  call the `search_gutenberg` tool and show me a table of the matches with
-  authors, languages, and Gutenberg URLs.”**
-- **“Use `search_gutenberg` to fetch the text for the top match of ‘Dracula`
-  and summarize it in 10 bullet points.”**
+### 4. Optional: MCP server
 
-The AI agent will handle calling the MCP tool and returning structured results
-to your app or UI.
+If you want, the same `search_gutenberg` logic is also exposed as an MCP server
+in `guttenread_mcp/server.py`. This is **optional** and not required for the
+reading list app.
+
+The MCP server is designed to run over **stdio**, as expected by MCP clients.
+In an MCP-capable IDE or chat environment you can configure a server entry
+named `guttenread-gutendex` that runs:
+
+- **Command**: `python`
+- **Args**: `-m`, `guttenread_mcp.server`
+
+Once configured, the client will discover the same `search_gutenberg` tool and
+can call it directly. The behavior and JSON shape are identical to what the
+reading list app uses.
 
 

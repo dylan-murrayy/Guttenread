@@ -1,4 +1,4 @@
-mcp
-requests
-openai
+mcp==1.21.2
+requests==2.32.5
+openai==2.8.1
 
