@@ -1,0 +1,12 @@
+name: guttenread
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - mcp
+      - requests
+      - openai
+
+
