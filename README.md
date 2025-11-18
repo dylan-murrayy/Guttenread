@@ -59,10 +59,10 @@ If you omit `--input-file`, it will read from stdin:
 python reading_list_app.py
 ```
 
-By default it uses `gpt-4o-mini`. You can change the model, or tell it to fetch text excerpts:
+By default it uses `gpt-5-mini`. You can change the model, or tell it to fetch text excerpts:
 
 ```bash
-python reading_list_app.py --model gpt-4o --download-text --max-chars 5000
+python reading_list_app.py --model gpt-5-mini --download-text --max-chars 5000
 ```
 
 The app will:
