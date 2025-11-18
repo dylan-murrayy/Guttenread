@@ -1,0 +1,16 @@
+# Python / Conda
+__pycache__/
+*.pyc
+.venv/
+.mypy_cache/
+.pytest_cache/
+
+# Environment / secrets
+.env
+.env.*
+env/
+
+# macOS
+.DS_Store
+
+
